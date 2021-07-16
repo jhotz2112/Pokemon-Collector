@@ -9,18 +9,29 @@ EVOLUTION = (
  )
 
 
-# Create your models here.
+class Attack(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.CharField(max_length=70)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('attacks_detail', kwargs={'pk': self.id})
+
+
 class Pokemon(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     description = models.TextField(max_length=300)
     weakness = models.TextField(max_length=100)
+    attacks = models.ManyToManyField(Attack)
 
-    def __str__(pkmn):
-        return f"{pkmn.name} is described as {pkmn.description} and is a {pkmn.type} type pokemon"
+    def __str__(self):
+        return f"{self.name} is described as {self.description} and is a {self.type} type pokemon"
 
-    def get_absolute_url(pkmn):
-        return reverse('detail', kwargs={'pokemon_id': pkmn.id })
+    def get_absolute_url(self):
+        return reverse('detail', kwargs={'pokemon_id': self.id })
 
     def evolution_for_today(self):
         return self.evolution_set.filter(date=date.today()).count() >= len(EVOLUTION)  
@@ -41,3 +52,4 @@ class Evolution(models.Model):
 
     class Meta:
         ordering = ['-date']
+
