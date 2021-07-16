@@ -1,11 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic import ListView, DetailView
 from .models import Pokemon
+from .forms import EvolutionForm
 
-from django.http import HttpResponse
 
 def home(request):
-    return HttpResponse("<h1>Gotta Catch 'Em All<h1>")
+    return render(request, 'home.html')
 
 def about(request):
     return render(request, 'about.html')
@@ -16,7 +17,11 @@ def pokemon_index(request):
 
 def pokemon_detail(request, pokemon_id):
   pokemon = Pokemon.objects.get(id=pokemon_id)
-  return render(request, 'pokemon/detail.html', { 'pokemon': pokemon })
+  evolution_form = EvolutionForm()
+  return render(request, 'pokemon/detail.html', {
+    'pokemon': pokemon,
+    'evolution_form': evolution_form,
+  })
 
 class PokemonCreate(CreateView):
   model = Pokemon
@@ -29,3 +34,11 @@ class PokemonUpdate(UpdateView):
 class PokemonDelete(DeleteView):
   model = Pokemon
   success_url = '/pokemon/'
+
+def add_evolution(request, pokemon_id):
+  form = EvolutionForm(request.POST)
+  if form.is_valid():
+    new_evolution = form.save(commit=False)
+    new_evolution.pokemon_id = pokemon_id
+    new_evolution.save()
+  return redirect('detail', pokemon_id=pokemon_id)
